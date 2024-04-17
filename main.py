@@ -17,9 +17,12 @@ def checkTable():
     for item in cursor:
         print(item)
 
-def checkAdmin(id, pin):
-    sql = "SELECT ADMIN FROM banking WHERE ID = %s AND PIN = %s LIMIT 1"
-    cursor.execute(sql, (id, pin))
+def checkAdmin(accNum):
+    print(accNum)
+    sql = "SELECT admin FROM banking WHERE accountnumber = %s"
+    val = (accNum,)
+    cursor.execute(sql, val)
+
     check = cursor.fetchall()
     (adminPerm) = check[0][0]
 
@@ -58,9 +61,9 @@ def login(accNum, pin):
     if not check:
         return False
     else:
-        (sqlID, sqlPIN) = check[0]
+        (sqlNum, sqlPIN) = check[0]
 
-        if sqlID == id and sqlPIN == pin:
+        if sqlNum == id and sqlPIN == pin:
             return True
 
 def adminScreen():
@@ -104,7 +107,7 @@ def main():
                 if login(accNum, pin) == False:
                     print("Could not login, try again.")
                 else:
-                    if checkAdmin(id, pin):
+                    if checkAdmin(accNum):
                         if not adminScreen():
                             loggedIn = False
         while(True):
