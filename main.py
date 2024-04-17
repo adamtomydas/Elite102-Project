@@ -18,7 +18,6 @@ def checkTable():
         print(item)
 
 def checkAdmin(accNum):
-    print(accNum)
     sql = "SELECT admin FROM banking WHERE accountnumber = %s"
     val = (accNum,)
     cursor.execute(sql, val)
