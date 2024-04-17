@@ -43,10 +43,10 @@ def createAccount():
     cursor.execute(select_statement)
     check = cursor.fetchall()
     (id) = check[0][0]
-    print(id)
 
     accountNumber = str(id) + first[0:2].upper() + last[0:2].upper()
-    print(accountNumber)
+    print()
+    print("Your account number: " + accountNumber)
     insert_statement = "UPDATE banking SET accountnumber = %s WHERE ID = %s"
     cursor.execute(insert_statement, (accountNumber, id))
 
@@ -99,7 +99,7 @@ def main():
     while(quitApp):
         while(loggedIn):
             print()
-            accNum = str(input("Enter your account number: "))
+            accNum = str(input("Enter your account number: ")).upper()
             pin = str(input("Enter your account PIN: "))
             if len(pin) == 4 and pin.isdigit():
                 pin = int(pin)
@@ -109,6 +109,8 @@ def main():
                     if checkAdmin(accNum):
                         if not adminScreen():
                             loggedIn = False
+                    else:
+                        print("USER SCREEN")
         while(True):
             print()
             quit = str(input("Would you like to quit the app? (yes/no): "))
