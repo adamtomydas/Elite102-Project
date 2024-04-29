@@ -19,3 +19,10 @@ $24.24 was successfully transfered from account 2TOPA to account 12NODJ
 2024/04/29 06:11:30 CST | WITHDRAW | $12.43 was withdrawed from account 2TOPA, balance changed $144.11 ---> $131.68
 2024/04/29 06:11:30 CST | DEPOSIT | $12.43 was deposited into account 3TOPA, balance changed $12.32 ---> $24.75
 2024/04/29 06:11:30 CST | WIRETRANSFER | $12.43 was successfully transfered from account 2TOPA to account 3TOPA
+2024/04/29 06:15:18 CST | CREATEACCOUNT | Account 13THJA was created (name: Thomas Jacobs, pin: 4321)
+2024/04/29 06:16:58 CST | CLOSEACCOUNT | Account 13THJA was closed
+2024/04/29 06:17:43 CST | CREATEACCOUNT | Account 14THJA was created (name: Thomas Jacobs, pin: 4321)
+2024/04/29 06:18:16 CST | DEPOSIT | $12.43 was deposited into account 14THJA, balance changed $0.0 ---> $12.43
+2024/04/29 06:18:31 CST | WITHDRAW | $5.43 was withdrawed from account 14THJA, balance changed $12.43 ---> $7.0
+2024/04/29 06:18:31 CST | DEPOSIT | $5.43 was deposited into account 7CAAL, balance changed $45.45 ---> $50.88
+2024/04/29 06:18:31 CST | WIRETRANSFER | $5.43 was successfully transfered from account 14THJA to account 7CAAL
