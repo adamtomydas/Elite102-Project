@@ -2,6 +2,7 @@ import mysql.connector
 import random
 import string
 import time
+from datetime import datetime
 
 conn = mysql.connector.connect(
     user = 'root', 
@@ -10,7 +11,10 @@ conn = mysql.connector.connect(
 )
 
 cursor = conn.cursor()
-
+def getDate():
+    now = datetime.now()
+    date = now.strftime("%Y/%m/%d %H:%M:%S CST")
+    return date
 def checkTable():
     testQuery = ("SELECT * FROM banking")
     cursor.execute(testQuery)
@@ -51,19 +55,29 @@ def createAccount():
     insert_statement = "UPDATE banking SET accountnumber = %s WHERE ID = %s"
     cursor.execute(insert_statement, (accountNumber, id))
 
+    now = datetime.now()
+    logs = open("logs.txt", "a")
+    logs.write(f"{getDate()} | CREATEACCOUNT | Account {accountNumber} was created (name: {first} {last}, pin: {pin})\n")
+    logs.close()
+
     conn.commit()
 
 def closeAccount():
     accNum = str(input("Enter the account number you want to close: "))
     delete_statement = "DELETE FROM banking WHERE accountnumber = %s"
     val = (accNum,)
-    confirm = str(input(f"Are you sure you want to delete this ({accNum}) account? "))
+    confirm = str(input(f"Are you sure you want to close this ({accNum}) account? "))
     if confirm.lower() == "yes":
         cursor.execute(delete_statement, val)
-        print("Account was deleted.")
+        print("Account was closed.")
+
+        logs = open("logs.txt", "a")
+        logs.write(f"{getDate()} | CLOSEACCOUNT | Account {accNum} was closed\n")
+        logs.close()
+
         conn.commit()
     else:
-        print(f"Account ({accNum}) was not deleted.")
+        print(f"Account ({accNum}) was not closed.")
 
 def modifyAccount():
     while(True):
@@ -76,26 +90,46 @@ def modifyAccount():
         if choice == 1:
             print()
             accNum = str(input("Enter the account number you want to modify: "))
-            first = str(input("Enter new First Name: "))
-            last = str(input("Enter new last Last Name: "))
 
-            val = (first, last, accNum)
+            select_statement = "SELECT firstname, lastname FROM banking WHERE accountnumber = %s LIMIT 1"
+            val = (accNum,)
+            cursor.execute(select_statement, val)
+            check = cursor.fetchall()
+            (oldFirst, oldLast) = check[0]
+
+            newFirst = str(input("Enter new First Name: "))
+            newLast = str(input("Enter new Last Name: "))
+
+            val = (newFirst, newLast, accNum)
             update_statement = "UPDATE banking SET firstname = %s, lastname = %s WHERE accountnumber = %s"
 
             cursor.execute(update_statement, val)
             print("Name was changed in the account " + accNum)
+            logs = open("logs.txt", "a")
+            logs.write(f"{getDate()} | MODIFYNAME | Account {accNum}'s name was changed {oldFirst} {oldLast} ---> {newFirst} {newLast}\n")
+            logs.close()
 
             conn.commit()
         elif choice == 2:
             print()
             accNum = str(input("Enter the account number you want to modify: "))
-            pin = int(input("Enter new PIN: "))
+            select_statement = "SELECT pin FROM banking WHERE accountnumber = %s LIMIT 1"
+            val = (accNum,)
+            cursor.execute(select_statement, val)
+            check = cursor.fetchall()
+            (oldPin) = check[0][0]
 
-            val = (pin, accNum)
+            newPin = int(input("Enter new PIN: "))
+
+            val = (newPin, accNum)
             update_statement = "UPDATE banking SET pin = %s WHERE accountnumber = %s"
 
             cursor.execute(update_statement, val)
             print("PIN was changed in the account " + accNum)
+
+            logs = open("logs.txt", "a")
+            logs.write(f"{getDate()} | MODIFYPIN | Account {accNum}'s pin was changed {oldPin} ---> {newPin}\n")
+            logs.close()
 
             conn.commit()
         elif choice == 3:
@@ -152,6 +186,7 @@ def checkBalance(accNum, printVal):
         return balance
     
 def deposit(accNum, ogMoney, printVal):
+    oldBalance = checkBalance(accNum, False)
     if printVal:
         print()
         money = float(input("How much money would you like to deposit: "))
@@ -161,6 +196,12 @@ def deposit(accNum, ogMoney, printVal):
     val = (money, accNum)
     update_statement = "UPDATE banking SET balance = balance + %s WHERE accountnumber = %s"
     cursor.execute(update_statement, val)
+    newBalance = checkBalance(accNum, False)
+
+    logs = open("logs.txt", "a")
+    logs.write(f"{getDate()} | DEPOSIT | ${money} was deposited into account {accNum}, balance changed ${oldBalance} ---> ${newBalance}\n")
+    logs.close()
+
     conn.commit()
 
     if printVal:
@@ -170,6 +211,7 @@ def deposit(accNum, ogMoney, printVal):
         return True
 
 def withdraw(accNum, ogMoney, printVal):
+    oldBalance = checkBalance(accNum, False)
     if printVal:
         print()
         money = float(input("How much money would you like to withdraw: "))
@@ -181,12 +223,25 @@ def withdraw(accNum, ogMoney, printVal):
         if printVal:
             update_statement = "UPDATE banking SET balance = balance - %s WHERE accountnumber = %s"
             cursor.execute(update_statement, val)
+            
             print(f"${money} has been withdrawed from account {accNum}")
             checkBalance(accNum, True)
+            
+            newBalance = checkBalance(accNum, False)
+            logs = open("logs.txt", "a")
+            logs.write(f"{getDate()} | WITHDRAW | ${money} was withdrawed from account {accNum}, balance changed ${oldBalance} ---> ${newBalance}\n")
+            logs.close()
+
             conn.commit()
         else:
             update_statement = "UPDATE banking SET balance = balance - %s WHERE accountnumber = %s"
             cursor.execute(update_statement, val)
+
+            newBalance = checkBalance(accNum, False)
+            logs = open("logs.txt", "a")
+            logs.write(f"{getDate()} | WITHDRAW | ${money} was withdrawed from account {accNum}, balance changed ${oldBalance} ---> ${newBalance}\n")
+            logs.close()
+
             conn.commit()
             return True
     else:
@@ -205,6 +260,11 @@ def wireTransfer(accNum):
     if withdraw(accNum, money, False):
         if deposit(transferAcc, money, False):
             print(f"${money} was successfully transfered from account {accNum} to account {transferAcc}")
+
+            logs = open("logs.txt", "a")
+            logs.write(f"{getDate()} | WIRETRANSFER | ${money} was successfully transfered from account {accNum} to account {transferAcc}\n")
+            logs.close()
+
             checkBalance(accNum, True)
             checkBalance(transferAcc, True)
     else:

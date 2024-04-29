@@ -1,0 +1,21 @@
+Account 8JOCE was created with name: John Cena and pin: 6543
+Account 9ROFE was created with name: Roger Federer and pin: 2019
+Account 4JODO's name was changed John Doe ---> Jonathan Doe
+Account 4JODO's pin was changed 5432 ---> 9999
+34.56 was deposited into account 2TOPA, balance changed $65.04 ---> $99.6
+Account 8JOCE was deleted
+Account 10JOCE was created with name: John Cena, pin: 7654
+Account 10JOCE was deleted
+Account 11JOCE was created, name: John Cena, pin: 7654
+Account 12NODJ was created (name: Novak Djokovic, pin: 24)
+Account 12NODJ's pin was changed 24 ---> 2400
+43.56 was deposited into account 2TOPA, balance changed $99.6 ---> $143.16
+$20.45 was withdrawed from account 2TOPA, balance changed $143.16 ---> $122.71
+$24.24 was withdrawed from account 2TOPA, balance changed $122.71 ---> $98.47
+$24.24 was deposited into account 12NODJ, balance changed $0.0 ---> $24.24
+$24.24 was successfully transfered from account 2TOPA to account 12NODJ
+2024/04/29 06:08:12 CST| MODIFYPIN | Account 3TOPA's pin was changed 3456 ---> 6789
+2024/04/29 06:09:09 CST | DEPOSIT | $45.64 was deposited into account 2TOPA, balance changed $98.47 ---> $144.11
+2024/04/29 06:11:30 CST | WITHDRAW | $12.43 was withdrawed from account 2TOPA, balance changed $144.11 ---> $131.68
+2024/04/29 06:11:30 CST | DEPOSIT | $12.43 was deposited into account 3TOPA, balance changed $12.32 ---> $24.75
+2024/04/29 06:11:30 CST | WIRETRANSFER | $12.43 was successfully transfered from account 2TOPA to account 3TOPA
