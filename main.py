@@ -137,65 +137,99 @@ def adminScreen():
             print("Invalid Input\n")
     return False
 
-def checkBalance(accNum, returnVal):
+def checkBalance(accNum, printVal):
     val = (accNum,)
     select_statement = "SELECT balance FROM banking WHERE accountnumber = %s"
 
     cursor.execute(select_statement, val)
     check = cursor.fetchall()
     (balance) = check[0][0]
-    if returnVal:
+    if printVal:
         print()
-        print("Your current balance is: $" + str(balance))
+        print(f"The current balance of account {accNum} is: ${str(balance)}")
         time.sleep(3)
     else:
         return balance
     
-def deposit(accNum):
-    print()
-    money = float(input("How much money would you like to deposit: "))
+def deposit(accNum, ogMoney, printVal):
+    if printVal:
+        print()
+        money = float(input("How much money would you like to deposit: "))
+    else:
+        money = ogMoney
     
     val = (money, accNum)
     update_statement = "UPDATE banking SET balance = balance + %s WHERE accountnumber = %s"
     cursor.execute(update_statement, val)
-
-    print(f"${money} has been deposited into account {accNum}")
-    checkBalance(accNum, True)
-
     conn.commit()
 
-def withdraw(accNum):
-    print()
-    money = float(input("How much money would you like to withdraw: "))
+    if printVal:
+        print(f"${money} has been deposited into account {accNum}")
+        checkBalance(accNum, True)
+    else:
+        return True
+
+def withdraw(accNum, ogMoney, printVal):
+    if printVal:
+        print()
+        money = float(input("How much money would you like to withdraw: "))
+    else:
+        money = ogMoney
     val = (money, accNum)
 
     if money <= checkBalance(accNum, False):
-        update_statement = "UPDATE banking SET balance = balance - %s WHERE accountnumber = %s"
-        cursor.execute(update_statement, val)
-        print(f"${money} has been withdrawed from account {accNum}")
-        checkBalance(accNum, True)
-
-        conn.commit()
+        if printVal:
+            update_statement = "UPDATE banking SET balance = balance - %s WHERE accountnumber = %s"
+            cursor.execute(update_statement, val)
+            print(f"${money} has been withdrawed from account {accNum}")
+            checkBalance(accNum, True)
+            conn.commit()
+        else:
+            update_statement = "UPDATE banking SET balance = balance - %s WHERE accountnumber = %s"
+            cursor.execute(update_statement, val)
+            conn.commit()
+            return True
     else:
-        print("You do not have enough money to make this withdrawal")
-        checkBalance(accNum, True)
+        if printVal:
+            print("You do not have enough money to make this withdrawal")
+            checkBalance(accNum, True)
+        else:
+            return False
+        
+
+def wireTransfer(accNum):
+    print()
+    transferAcc = str(input("Enter the account number you want to transfer money to: "))
+    money = float(input("How much money would you like to transfer: "))
+
+    if withdraw(accNum, money, False):
+        if deposit(transferAcc, money, False):
+            print(f"${money} was successfully transfered from account {accNum} to account {transferAcc}")
+            checkBalance(accNum, True)
+            checkBalance(transferAcc, True)
+    else:
+        print(f"Account {accNum} does not have enough money to complete the transfer")
+        
+
 
 def userScreen(accNum):
     while(True):
         print()
         print("User Screen")
         print("-----------------")
-        print("1. Check Balance\n2. Deposit\n3. Withdraw\n4. Log Out")
+        print("1. Check Balance\n2. Deposit\n3. Withdraw\n4. Wire Transfer\n5. Log Out")
         choice = int(input("Choose value: "))
 
 
         if choice == 1:
             checkBalance(accNum, True)
         elif choice == 2:
-            deposit(accNum)
+            deposit(accNum, None, True)
         elif choice == 3:
-            withdraw(accNum)
+            withdraw(accNum, None, True)
         elif choice == 4:
+            wireTransfer(accNum)
+        elif choice == 5:
             break
         else:
             print("Invalid Input\n")
