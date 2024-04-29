@@ -1,6 +1,7 @@
 import mysql.connector
 import random
 import string
+import time
 
 conn = mysql.connector.connect(
     user = 'root', 
@@ -52,6 +53,56 @@ def createAccount():
 
     conn.commit()
 
+def closeAccount():
+    accNum = str(input("Enter the account number you want to close: "))
+    delete_statement = "DELETE FROM banking WHERE accountnumber = %s"
+    val = (accNum,)
+    confirm = str(input(f"Are you sure you want to delete this ({accNum}) account? "))
+    if confirm.lower() == "yes":
+        cursor.execute(delete_statement, val)
+        print("Account was deleted.")
+        conn.commit()
+    else:
+        print(f"Account ({accNum}) was not deleted.")
+
+def modifyAccount():
+    while(True):
+        print()
+        print("Admin Modify Account Screen")
+        print("-----------------")
+        print("1. Modify Name\n2. Modify PIN\n3. Quit")
+        choice = int(input("Choose value: "))
+
+        if choice == 1:
+            print()
+            accNum = str(input("Enter the account number you want to modify: "))
+            first = str(input("Enter new First Name: "))
+            last = str(input("Enter new last Last Name: "))
+
+            val = (first, last, accNum)
+            update_statement = "UPDATE banking SET firstname = %s, lastname = %s WHERE accountnumber = %s"
+
+            cursor.execute(update_statement, val)
+            print("Name was changed in the account " + accNum)
+
+            conn.commit()
+        elif choice == 2:
+            print()
+            accNum = str(input("Enter the account number you want to modify: "))
+            pin = int(input("Enter new PIN: "))
+
+            val = (pin, accNum)
+            update_statement = "UPDATE banking SET pin = %s WHERE accountnumber = %s"
+
+            cursor.execute(update_statement, val)
+            print("PIN was changed in the account " + accNum)
+
+            conn.commit()
+        elif choice == 3:
+            break
+        else:
+            print("Invalid Input\n")
+
 def login(accNum, pin):
     sql = "SELECT accountnumber, pin FROM banking WHERE accountnumber = %s AND pin = %s LIMIT 1"
     val = (accNum, pin)
@@ -76,10 +127,74 @@ def adminScreen():
 
         if choice == 1:
             createAccount()
-        #elif choice == 2:
-            #closeAccount()
-        #elif choice == 3:
-            #modifyAccount()
+        elif choice == 2:
+            closeAccount()
+        elif choice == 3:
+            modifyAccount()
+        elif choice == 4:
+            break
+        else:
+            print("Invalid Input\n")
+    return False
+
+def checkBalance(accNum, returnVal):
+    val = (accNum,)
+    select_statement = "SELECT balance FROM banking WHERE accountnumber = %s"
+
+    cursor.execute(select_statement, val)
+    check = cursor.fetchall()
+    (balance) = check[0][0]
+    if returnVal:
+        print()
+        print("Your current balance is: $" + str(balance))
+        time.sleep(3)
+    else:
+        return balance
+    
+def deposit(accNum):
+    print()
+    money = float(input("How much money would you like to deposit: "))
+    
+    val = (money, accNum)
+    update_statement = "UPDATE banking SET balance = balance + %s WHERE accountnumber = %s"
+    cursor.execute(update_statement, val)
+
+    print(f"${money} has been deposited into account {accNum}")
+    checkBalance(accNum, True)
+
+    conn.commit()
+
+def withdraw(accNum):
+    print()
+    money = float(input("How much money would you like to withdraw: "))
+    val = (money, accNum)
+
+    if money <= checkBalance(accNum, False):
+        update_statement = "UPDATE banking SET balance = balance - %s WHERE accountnumber = %s"
+        cursor.execute(update_statement, val)
+        print(f"${money} has been withdrawed from account {accNum}")
+        checkBalance(accNum, True)
+
+        conn.commit()
+    else:
+        print("You do not have enough money to make this withdrawal")
+        checkBalance(accNum, True)
+
+def userScreen(accNum):
+    while(True):
+        print()
+        print("User Screen")
+        print("-----------------")
+        print("1. Check Balance\n2. Deposit\n3. Withdraw\n4. Log Out")
+        choice = int(input("Choose value: "))
+
+
+        if choice == 1:
+            checkBalance(accNum, True)
+        elif choice == 2:
+            deposit(accNum)
+        elif choice == 3:
+            withdraw(accNum)
         elif choice == 4:
             break
         else:
@@ -110,7 +225,8 @@ def main():
                         if not adminScreen():
                             loggedIn = False
                     else:
-                        print("USER SCREEN")
+                        userScreen(accNum)
+                        loggedIn = False
         while(True):
             print()
             quit = str(input("Would you like to quit the app? (yes/no): "))
@@ -122,6 +238,7 @@ def main():
                 break
             else:
                 print("Invalid Input")
+    print("Thank you for using the bank app!")
 
 
 
